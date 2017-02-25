@@ -36,8 +36,19 @@ features_train = features_train[:150].toarray()
 labels_train   = labels_train[:150]
 
 
-
+#%%
 ### your code goes here
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
 
+clf = DecisionTreeClassifier(random_state=42)
+clf.fit(features_train, labels_train)
+pred = clf.predict(features_test)
+print accuracy_score(labels_test,pred)
 
-
+#%%
+i = 0
+for item in clf.feature_importances_:
+    if item > 0.2:
+        print item, i, vectorizer.get_feature_names()[i]
+    i += 1

@@ -28,4 +28,26 @@ labels, features = targetFeatureSplit(data)
 
 ### your code goes here 
 
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.cross_validation import train_test_split
+features_train, features_test, labels_train, labels_test = train_test_split(features, labels, test_size=0.3, random_state=42)
+
+
+clf = DecisionTreeClassifier()
+clf.fit(features_train, labels_train)
+pred = clf.predict(features_test)
+print accuracy_score(labels_test, pred)
+
+#%%
+poi = 0
+for entry in labels_test:
+    if entry == 1:
+        poi += 1
+
+print poi
+
+#%%
+from sklearn.metrics import confusion_matrix
+print confusion_matrix(labels_test, pred)
 
