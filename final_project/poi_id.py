@@ -25,6 +25,32 @@ with open("final_project_dataset.pkl", "r") as data_file:
 ### Task 2: Remove outliers
 data_dict.pop('TOTAL', 0)
 
+# number of poi samples
+s = 0
+for key in data_dict:
+    if data_dict[key]['poi']==True:
+        s += 1
+        
+# percentage of samples missing each feature
+missing_features = {}
+for key in data_dict:
+    for feature in data_dict[key]:
+        if data_dict[key][feature] == 'NaN':
+            if feature in missing_features:
+                missing_features[feature] += 1
+            else:
+                missing_features[feature] = 1
+
+# percentage of poi missing each feature
+missing_features = {}
+for key in data_dict:
+    for feature in data_dict[key]:
+        if (data_dict[key][feature] == 'NaN') and (data_dict[key]['poi'] == True):
+            if feature in missing_features:
+                missing_features[feature] += 1
+            else:
+                missing_features[feature] = 1
+
 #%%
 ### Task 3: Create new feature(s)
 for key in data_dict:
@@ -48,30 +74,11 @@ for key in data_dict:
     else:
         data_dict[key]['bonus_to_salary'] = float(data_dict[key]['bonus'])/data_dict[key]['salary']
     
-# 0.55, 0.55
-#features_list = ['poi','salary', 'bonus', 'expenses', 'from_messages_poi_ratio', 'to_messages_poi_ratio', 'from_messages', 'from_this_person_to_poi', 'to_messages', 'from_poi_to_this_person', 'shared_receipt_with_poi', 'shared_receipt_with_poi_ratio', 'bonus_to_salary', 'restricted_stock'] # You will need to use more features
-# 0.6, 0.4
-#features_list = ['poi', 'salary', 'total_payments', 'bonus', 'deferred_income', 'total_stock_value', 'expenses', 'exercised_stock_options', 'other', 'long_term_incentive', 'restricted_stock', 'to_messages', 'from_poi_to_this_person', 'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']
-# 0.73, 0.38
-#features_list = ['poi', 'total_payments', 'bonus', 'deferred_income', 'expenses', 'other', 'restricted_stock', 'from_this_person_to_poi']
-# 0.51, 0.38
-#features_list = ['poi', 'salary', 'bonus', 'expenses', 'to_messages', 'from_poi_to_this_person', 'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']
-# 0.66, 0.4
-#features_list = ['poi', 'salary', 'bonus', 'expenses', 'to_messages', 'from_poi_to_this_person', 'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi', 'shared_receipt_with_poi_ratio', 'from_messages_poi_ratio', 'to_messages_poi_ratio']
-# 0.76, 0.45
-#features_list = ['poi', 'deferred_income', 'expenses', 'exercised_stock_options', 'other']
-# 0.78, 0.5
-features_list = ['poi', 'deferred_income', 'expenses', 'exercised_stock_options', 'other', 'shared_receipt_with_poi_ratio', 'from_messages_poi_ratio', 'to_messages_poi_ratio']
-# 0.8, 0.45
-#features_list = ['poi', 'deferred_income', 'expenses', 'exercised_stock_options', 'other', 'shared_receipt_with_poi_ratio', 'from_messages_poi_ratio', 'to_messages_poi_ratio', 'to_messages', 'from_poi_to_this_person', 'from_messages', 'from_this_person_to_poi', 'shared_receipt_with_poi']
-# 0.5, 0.4
-#features_list = ['poi', 'exercised_stock_options', 'other', 'bonus_to_salary', 'shared_receipt_with_poi_ratio', 'from_messages_poi_ratio', 'to_messages_poi_ratio']
-# 0.54, 0.4
-#features_list = ['poi', 'total_payments', 'bonus', 'deferred_income', 'expenses', 'other', 'restricted_stock', 'from_this_person_to_poi', 'shared_receipt_with_poi_ratio', 'from_messages_poi_ratio', 'to_messages_poi_ratio']
-# 0.62, 0.38
-#features_list = ['poi', 'deferred_income', 'expenses', 'other', 'restricted_stock', 'from_this_person_to_poi']
-# 0.6, 0.53
-#features_list = ['poi', 'deferred_income', 'expenses', 'other', 'restricted_stock', 'from_this_person_to_poi', 'shared_receipt_with_poi_ratio', 'from_messages_poi_ratio', 'to_messages_poi_ratio']
+#features_list = ['poi', 'deferred_income', 'expenses', 
+#                 'exercised_stock_options', 'other']
+features_list = ['poi', 'deferred_income', 'expenses', 
+                 'exercised_stock_options', 'other', 'from_messages_poi_ratio']
+
 ### Store to my_dataset for easy export below.
 my_dataset = data_dict
 
@@ -120,24 +127,28 @@ skf  = StratifiedKFold(labels, n_folds=5, random_state=42)
 #dtc = clfGS.best_estimator_
 #print dtc, clfGS.best_score_
 
-#parameters_abc = {"n_estimators" : [5, 10, 20, 40, 80], 
-#                  "learning_rate" : [.25, .5, 1, 2]}
-#abc = AdaBoostClassifier(random_state=42)
-#clfGS = GridSearchCV(abc, parameters_abc, cv=skf, scoring='f1')
-#clfGS.fit(features, labels)
-#abc = clfGS.best_estimator_
-#print abc, clfGS.best_score_
+parameters_abc = dict(n_estimators = [5, 10, 20, 40, 80], 
+                  learning_rate = [.25, .5, 1, 2])
+abc = AdaBoostClassifier(random_state=42)
+clfGS = GridSearchCV(abc, parameters_abc, cv=skf, scoring='f1')
+clfGS.fit(features, labels)
+abc = clfGS.best_estimator_
+print abc, clfGS.best_score_
 
 #%%
-#clf = abc
-clf = AdaBoostClassifier(n_estimators=40, learning_rate=1, random_state=42)
+clf = abc
+#clf = AdaBoostClassifier(n_estimators=10, learning_rate=1, random_state=42)
 
 from sklearn.cross_validation import cross_val_score
 
-print 'accuracy: ', cross_val_score(clf, features, labels, cv=skf, scoring='accuracy').mean()
-print 'precision: ', cross_val_score(clf, features, labels, cv=skf, scoring='precision').mean()
-print 'recall: ', cross_val_score(clf, features, labels, cv=skf, scoring='recall').mean()
-print 'f1: ', cross_val_score(clf, features, labels, cv=skf, scoring='f1').mean()
+print 'accuracy: ', cross_val_score(clf, features, labels, 
+                                    cv=skf, scoring='accuracy').mean()
+print 'precision: ', cross_val_score(clf, features, labels, cv=skf, 
+                                     scoring='precision').mean()
+print 'recall: ', cross_val_score(clf, features, labels, cv=skf, 
+                                  scoring='recall').mean()
+print 'f1: ', cross_val_score(clf, features, labels, cv=skf, 
+                              scoring='f1').mean()
 
 #%%
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
